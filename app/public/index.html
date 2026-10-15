@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Text-to-CAD Viewer</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #1d2330; --muted: #6b7385; --line: #dfe3ea;
+    --accent: #2f6fde; --err-bg: #fdecec; --err-ink: #a32020; --viewport: #e9edf3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171d; --panel: #1b1f27; --ink: #e6e9ef; --muted: #8d95a6; --line: #2b313d;
+            --accent: #6aa0ff; --err-bg: #3a1d1f; --err-ink: #ffb4b4; --viewport: #10131a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; display: grid; grid-template-columns: 280px 1fr; background: var(--bg);
+         color: var(--ink); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  header { padding: 16px; border-bottom: 1px solid var(--line); }
+  header h1 { margin: 0; font-size: 16px; }
+  header p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+  #list { list-style: none; margin: 0; padding: 8px; overflow: auto; flex: 1; }
+  #list li { padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+  #list li:hover { background: var(--bg); }
+  #list li.active { background: var(--accent); color: #fff; }
+  #list li small { display: block; opacity: .7; font-size: 11px; }
+  main { position: relative; min-width: 0; }
+  #view { position: absolute; inset: 0; }
+  .hud { position: absolute; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+  #info { top: 12px; left: 12px; max-width: 360px; }
+  #info h2 { margin: 0 0 4px; font-size: 15px; }
+  #info .desc { color: var(--muted); margin: 0 0 8px; }
+  #info dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; font-variant-numeric: tabular-nums; }
+  #info dt { color: var(--muted); }
+  #info dd { margin: 0; }
+  #tools { top: 12px; right: 12px; display: flex; gap: 6px; padding: 6px; }
+  button { font: inherit; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  #error { bottom: 12px; left: 12px; right: 12px; background: var(--err-bg); color: var(--err-ink); display: none; white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 12px; }
+  #empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); pointer-events: none; }
+  @media (max-width: 700px) { body { grid-template-columns: 1fr; grid-template-rows: 160px 1fr; } aside { border-right: 0; border-bottom: 1px solid var(--line); } }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "/vendor/three/build/three.module.js",
+    "three/addons/": "/vendor/three/examples/jsm/",
+    "three-mesh-bvh": "/vendor/three-mesh-bvh/src/index.js",
+    "three-bvh-csg": "/vendor/three-bvh-csg/src/index.js"
+  }
+}
+</script>
+</head>
+<body>
+<aside>
+  <header>
+    <h1>Text-to-CAD Viewer</h1>
+    <p>Watching <code>app/models/</code> — new files appear automatically.</p>
+  </header>
+  <ul id="list"></ul>
+</aside>
+<main>
+  <div id="view"></div>
+  <div id="empty">No models yet. Ask Claude to make one.</div>
+  <div id="info" class="hud" hidden></div>
+  <div id="tools" class="hud">
+    <button id="btn-wire" title="Toggle wireframe">Wireframe</button>
+    <button id="btn-fit" title="Fit view">Fit</button>
+    <button id="btn-stl" title="Download STL">STL</button>
+  </div>
+  <div id="error" class="hud"></div>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+import { buildMesh } from '/lib/build.mjs';
+
+THREE.Object3D.DEFAULT_UP.set(0, 0, 1); // CAD convention: Z is up
+
+const el = (id) => document.getElementById(id);
+const viewEl = el('view');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(devicePixelRatio);
+viewEl.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100000);
+camera.position.set(150, -200, 150);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 1.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+sun.position.set(200, -150, 300);
+scene.add(sun);
+const grid = new THREE.GridHelper(400, 40, 0x888888, 0xbbbbbb);
+grid.rotation.x = Math.PI / 2; // lay the grid on the XY floor
+scene.add(grid);
+scene.add(new THREE.AxesHelper(30));
+
+const material = new THREE.MeshStandardMaterial({ color: '#8fa3b8', metalness: 0.15, roughness: 0.55 });
+const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x1d2330, transparent: true, opacity: 0.35 });
+let current = null;       // { file, mtime, mesh, edges }
+let models = [];
+
+function applyTheme() {
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  scene.background = new THREE.Color(dark ? '#10131a' : '#e9edf3');
+  edgesMaterial.color.set(dark ? 0xdde3ee : 0x1d2330);
+}
+applyTheme();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+function resize() {
+  const { clientWidth: w, clientHeight: h } = viewEl;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(viewEl);
+
+function fit() {
+  if (!current) return;
+  const box = new THREE.Box3().setFromObject(current.mesh);
+  const size = box.getSize(new THREE.Vector3()).length() || 100;
+  const center = box.getCenter(new THREE.Vector3());
+  controls.target.copy(center);
+  camera.position.copy(center).add(new THREE.Vector3(0.6, -0.9, 0.7).normalize().multiplyScalar(size * 1.4));
+  camera.near = size / 100; camera.far = size * 100; camera.updateProjectionMatrix();
+}
+
+function showError(msg) {
+  el('error').style.display = msg ? 'block' : 'none';
+  el('error').textContent = msg ?? '';
+}
+
+// Feature edges: only edges shared by exactly two faces meeting at a real angle.
+// (three's EdgesGeometry also draws the T-junction seams CSG leaves on flat faces.)
+function creaseEdges(geometry, angleDeg = 25) {
+  const pos = geometry.attributes.position;
+  const idx = geometry.index;
+  const triCount = idx ? idx.count / 3 : pos.count / 3;
+  const key = (i) => `${Math.round(pos.getX(i) * 1e3)},${Math.round(pos.getY(i) * 1e3)},${Math.round(pos.getZ(i) * 1e3)}`;
+  const edges = new Map();
+  const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let t = 0; t < triCount; t++) {
+    const ids = [0, 1, 2].map((k) => (idx ? idx.getX(t * 3 + k) : t * 3 + k));
+    a.fromBufferAttribute(pos, ids[0]); b.fromBufferAttribute(pos, ids[1]); c.fromBufferAttribute(pos, ids[2]);
+    const n = new THREE.Vector3().crossVectors(b.clone().sub(a), c.clone().sub(a));
+    if (n.lengthSq() < 1e-12) continue;
+    n.normalize();
+    for (let e = 0; e < 3; e++) {
+      const i = ids[e], j = ids[(e + 1) % 3];
+      const ki = key(i), kj = key(j);
+      const k = ki < kj ? `${ki}|${kj}` : `${kj}|${ki}`;
+      const entry = edges.get(k) ?? { i, j, normals: [] };
+      entry.normals.push(n);
+      edges.set(k, entry);
+    }
+  }
+  const cos = Math.cos(angleDeg * Math.PI / 180);
+  const out = [];
+  for (const { i, j, normals } of edges.values()) {
+    if (normals.length !== 2 || normals[0].dot(normals[1]) > cos) continue;
+    out.push(pos.getX(i), pos.getY(i), pos.getZ(i), pos.getX(j), pos.getY(j), pos.getZ(j));
+  }
+  return new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(out, 3));
+}
+
+function fmt(n) { return Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+
+function showInfo(spec, stats) {
+  const info = el('info');
+  info.hidden = false;
+  const params = Object.entries(spec.parameters ?? {}).map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  info.innerHTML = `
+    <h2></h2><p class="desc"></p>
+    <dl>
+      <dt>Size (mm)</dt><dd>${stats.size.map(fmt).join(' × ')}</dd>
+      <dt>Volume</dt><dd>${fmt(stats.volume_mm3 / 1000)} cm³</dd>
+      <dt>Features</dt><dd>${spec.features.length} (${stats.instances} instances)</dd>
+      ${params}
+    </dl>`;
+  info.querySelector('h2').textContent = spec.name ?? '(unnamed)';
+  info.querySelector('.desc').textContent = spec.description ?? '';
+}
+
+async function load(file, mtime) {
+  try {
+    const res = await fetch(`/models/${encodeURIComponent(file)}?t=${mtime}`);
+    const spec = JSON.parse(await res.text());
+    material.color.set(spec.color ?? '#8fa3b8');
+    const { mesh, stats } = buildMesh(spec, material);
+    const edges = new THREE.LineSegments(creaseEdges(mesh.geometry), edgesMaterial);
+    if (current) { scene.remove(current.mesh, current.edges); current.mesh.geometry.dispose(); current.edges.geometry.dispose(); }
+    const isNewFile = current?.file !== file;
+    current = { file, mtime, mesh, edges };
+    scene.add(mesh, edges);
+    showInfo(spec, stats);
+    showError(null);
+    if (isNewFile) fit();
+  } catch (e) {
+    current = current && { ...current, file, mtime };
+    showError(`${file}: ${e.message}`);
+  }
+  renderList();
+}
+
+function renderList() {
+  el('empty').style.display = models.length ? 'none' : 'grid';
+  el('list').replaceChildren(...models.map((m) => {
+    const li = document.createElement('li');
+    li.className = m.file === current?.file ? 'active' : '';
+    li.innerHTML = `<span></span><small></small>`;
+    li.querySelector('span').textContent = m.name;
+    li.querySelector('small').textContent = `${m.file} · ${new Date(m.mtime).toLocaleTimeString()}`;
+    li.onclick = () => load(m.file, m.mtime);
+    return li;
+  }));
+}
+
+async function poll() {
+  try {
+    const next = await (await fetch('/api/models')).json();
+    const known = new Set(models.map((m) => m.file));
+    const fresh = next.find((m) => !known.has(m.file));
+    models = next;
+    const mine = current && next.find((m) => m.file === current.file);
+    if (fresh && known.size) await load(fresh.file, fresh.mtime);                // a new model appeared: show it
+    else if (!current && next[0]) await load(next[0].file, next[0].mtime);       // first load: newest model
+    else if (mine && mine.mtime !== current.mtime) await load(mine.file, mine.mtime); // the shown model was edited
+    else renderList();
+  } catch { /* server restarting; try again next tick */ }
+}
+
+el('btn-fit').onclick = fit;
+el('btn-wire').onclick = () => { material.wireframe = !material.wireframe; };
+el('btn-stl').onclick = () => {
+  if (!current) return;
+  const stl = new STLExporter().parse(current.mesh, { binary: true });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([stl], { type: 'model/stl' })),
+    download: current.file.replace(/\.json$/, '.stl'),
+  });
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+poll();
+setInterval(poll, 1500);
+</script>
+</body>
+</html>

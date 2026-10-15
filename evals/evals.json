@@ -1,0 +1,103 @@
+{
+  "skill_name": "cad-spec",
+  "evals": [
+    {
+      "id": 1,
+      "name": "flange-bolt-circle",
+      "prompt": "I need a pipe flange for a 50 mm pipe: 120 mm outside diameter, 12 mm thick, 50 mm bore through the middle, and six M10 bolt holes evenly spaced on a 95 mm bolt circle.",
+      "expected_output": "A 120 x 120 x 12 mm disc on the floor, centred, with a 50 mm through-bore and six ~11 mm clearance holes on a 95 mm pitch circle (circular pattern).",
+      "files": [],
+      "checks": [
+        { "type": "valid" },
+        { "type": "size", "expected": [120, 120, 12], "tolerance": 1 },
+        { "type": "sits_on_floor" },
+        { "type": "centered_xy" },
+        { "type": "open", "from": [0, 0, -1], "to": [0, 0, 13], "text": "Bore goes all the way through" },
+        { "type": "count", "op": "subtract", "min": 7, "text": "Bore plus six bolt holes are cut" },
+        { "type": "solid", "point": [33, 0, 6], "text": "Material between the bore and the bolt circle" },
+        { "type": "volume", "min": 104000, "max": 107000, "text": "Volume fits a 50 mm bore and six M10 clearance holes (10-11.5 mm)" }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "plate-corner-holes",
+      "prompt": "Make a mounting plate 100 mm long (X) by 60 mm wide (Y) and 5 mm thick, with a 5 mm diameter hole 8 mm in from each corner.",
+      "expected_output": "A 100 x 60 x 5 mm plate, centred, with four 5 mm through-holes centred at (±42, ±22).",
+      "files": [],
+      "checks": [
+        { "type": "valid" },
+        { "type": "size", "expected": [100, 60, 5], "tolerance": 0.5 },
+        { "type": "sits_on_floor" },
+        { "type": "centered_xy" },
+        { "type": "open", "from": [42, 22, -1], "to": [42, 22, 6], "text": "Hole at the +X +Y corner" },
+        { "type": "open", "from": [-42, 22, -1], "to": [-42, 22, 6], "text": "Hole at the -X +Y corner" },
+        { "type": "open", "from": [42, -22, -1], "to": [42, -22, 6], "text": "Hole at the +X -Y corner" },
+        { "type": "open", "from": [-42, -22, -1], "to": [-42, -22, 6], "text": "Hole at the -X -Y corner" },
+        { "type": "solid", "point": [0, 0, 2.5], "text": "Plate centre is solid" },
+        { "type": "volume", "min": 29400, "max": 29800, "text": "Volume matches four 5 mm holes (not 5 mm radius)" }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "mug-hollow",
+      "prompt": "Design a coffee mug, about 85 mm tall and 80 mm in diameter, 4 mm thick walls, with a handle on the side.",
+      "expected_output": "A hollow cylinder 80 mm across and 85 mm tall with a closed floor, open top and a handle joined to the side.",
+      "files": [],
+      "checks": [
+        { "type": "valid" },
+        { "type": "size", "expected": [null, null, 85], "tolerance": 1.5, "text": "85 mm tall" },
+        { "type": "size_range", "min": [80, 80, 80], "max": [135, 135, 90], "text": "Footprint is the 80 mm body plus a handle" },
+        { "type": "sits_on_floor" },
+        { "type": "open", "from": [0, 0, 86], "to": [0, 0, 12], "text": "Open top: the cavity reaches down into the mug" },
+        { "type": "solid", "point": [0, 0, 2], "text": "Has a closed floor" },
+        { "type": "fill_ratio", "max": 0.4, "text": "Mug is hollow (fills under 40% of its bounding box)" }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "enclosure-with-posts",
+      "prompt": "Electronics enclosure base, open top: 120 x 80 x 40 mm outside (X x Y x Z), 2.5 mm walls and floor, plus four 6 mm diameter mounting posts in the inside corners, 20 mm tall, each with a 2.5 mm pilot hole.",
+      "expected_output": "An open-top box 120 x 80 x 40 mm with 2.5 mm walls and floor, four 6 mm posts in the inner corners rising from the floor, each with a pilot hole.",
+      "files": [],
+      "checks": [
+        { "type": "valid" },
+        { "type": "size", "expected": [120, 80, 40], "tolerance": 0.5 },
+        { "type": "sits_on_floor" },
+        { "type": "centered_xy" },
+        { "type": "open", "from": [0, 0, 41], "to": [0, 0, 3], "text": "Cavity is open from the top down to the floor" },
+        { "type": "solid", "point": [0, 0, 1.25], "text": "Floor is solid" },
+        { "type": "solid", "point": [58.75, 0, 20], "text": "+X wall is solid at 2.5 mm thickness" },
+        { "type": "count", "op": "add", "min": 5, "text": "Shell plus four posts are added" },
+        { "type": "count", "op": "subtract", "min": 5, "text": "Cavity plus four pilot holes are cut" },
+        { "type": "fill_ratio", "max": 0.3, "text": "Enclosure is hollow (fills under 30% of its bounding box)" }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "inch-spacer",
+      "prompt": "Model a nylon spacer for a #10 machine screw: 1/2 inch outside diameter and 3/4 inch long.",
+      "expected_output": "A tube 12.7 mm OD x 19.05 mm long with a ~5 mm through-hole (#10 clearance), converted to millimetres.",
+      "files": [],
+      "checks": [
+        { "type": "valid" },
+        { "type": "size", "expected": [12.7, 12.7, 19.05], "tolerance": 0.3, "any_orientation": true, "text": "Converted inches to mm: 12.7 x 12.7 x 19.05" },
+        { "type": "sits_on_floor" },
+        { "type": "centered_xy" },
+        { "type": "volume", "min": 1900, "max": 2120, "text": "Bore is #10 clearance size (4.8-5.6 mm)" }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "vague-phone-stand",
+      "prompt": "can you make me a simple stand to prop my phone up on my desk",
+      "expected_output": "Some reasonable phone stand, made without asking questions: sits on the floor, desk-object sized, not a solid block.",
+      "files": [],
+      "checks": [
+        { "type": "valid" },
+        { "type": "sits_on_floor" },
+        { "type": "size_range", "min": [40, 40, 40], "max": [250, 250, 250], "text": "Phone-stand sized (every dimension 40-250 mm)" },
+        { "type": "fill_ratio", "max": 0.7, "text": "Not just a solid block (fills under 70% of its bounding box)" }
+      ]
+    }
+  ]
+}

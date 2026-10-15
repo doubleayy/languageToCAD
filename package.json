@@ -1,0 +1,24 @@
+{
+  "name": "language-to-cad-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent Skills workshop: natural language -> CAD spec -> three.js viewer",
+  "scripts": {
+    "start": "node app/server.mjs",
+    "measure": "node tools/measure.mjs",
+    "render": "node tools/render.mjs",
+    "check": "node tools/check.mjs",
+    "batch": "node pipeline/batch.mjs",
+    "eval": "node evals/run.mjs",
+    "grade": "node evals/grade.mjs",
+    "eval:view": "node evals/view.mjs",
+    "test": "node tools/selftest.mjs",
+    "reset": "node tools/reset.mjs"
+  },
+  "dependencies": {
+    "three": "0.170.0",
+    "three-bvh-csg": "0.0.17",
+    "three-mesh-bvh": "0.8.3"
+  }
+}

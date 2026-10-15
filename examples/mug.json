@@ -1,0 +1,12 @@
+{
+  "name": "Coffee mug",
+  "units": "mm",
+  "description": "80 mm diameter, 95 mm tall mug, 4 mm walls, 6 mm floor, D-shaped handle",
+  "color": "#d9d4c7",
+  "parameters": { "outer_d": 80, "height": 95, "wall": 4, "floor": 6 },
+  "features": [
+    { "id": "body", "op": "add", "shape": "cylinder", "radius": 40, "height": 95, "position": [0, 0, 47.5] },
+    { "id": "handle", "op": "add", "shape": "torus", "radius": 22, "tube": 5, "position": [40, 0, 50], "rotation": [90, 0, 0] },
+    { "id": "cavity", "op": "subtract", "shape": "cylinder", "radius": 36, "height": 95, "position": [0, 0, 53.5] }
+  ]
+}

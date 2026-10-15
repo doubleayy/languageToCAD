@@ -1,0 +1,10 @@
+{
+  "name": "Part name",
+  "units": "mm",
+  "description": "One sentence: what it is and its key dimensions",
+  "color": "#8fa3b8",
+  "parameters": {},
+  "features": [
+    { "id": "base", "op": "add", "shape": "box", "size": [10, 10, 10], "position": [0, 0, 5] }
+  ]
+}

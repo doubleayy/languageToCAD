@@ -1,0 +1,14 @@
+{
+  "name": "Pipe flange",
+  "units": "mm",
+  "description": "100 mm flange, 10 mm thick, 30 mm raised hub, 40 mm bore, 6 x M8 bolt holes on an 80 mm PCD",
+  "color": "#b08d57",
+  "parameters": { "outer_d": 100, "thickness": 10, "bore_d": 40, "bolt_count": 6, "bolt_hole_d": 9, "pcd": 80 },
+  "features": [
+    { "id": "disc", "op": "add", "shape": "cylinder", "radius": 50, "height": 10, "position": [0, 0, 5] },
+    { "id": "hub", "op": "add", "shape": "cylinder", "radius": 30, "height": 20, "position": [0, 0, 20] },
+    { "id": "bore", "op": "subtract", "shape": "cylinder", "radius": 20, "height": 34, "position": [0, 0, 15] },
+    { "id": "bolt-hole", "op": "subtract", "shape": "cylinder", "radius": 4.5, "height": 14, "position": [40, 0, 5],
+      "pattern": { "type": "circular", "count": 6, "axis": "z", "center": [0, 0, 0] } }
+  ]
+}

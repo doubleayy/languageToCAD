@@ -1,0 +1,22 @@
+[
+  { "query": "I need a bracket to hold a 40mm fan against the side of my 3d printer frame, 2020 extrusion, two M5 holes for the t-nuts. can you model it?", "should_trigger": true },
+  { "query": "Design a coaster: 95 mm round, 6 mm thick, with a 2 mm recessed lip so condensation stays on it.", "should_trigger": true },
+  { "query": "make the flange in app/models/pipe-flange.json 3mm thicker and add two more bolt holes", "should_trigger": true },
+  { "query": "my kid lost the knob off our toy stove. it's a d-shaft about 6mm, the knob was maybe 35mm across. can you whip up a 3d model i can print", "should_trigger": true },
+  { "query": "Create a CAD model of a cable organizer that clips onto the back edge of a 25 mm thick desk and holds five USB cables", "should_trigger": true },
+  { "query": "model a 120 x 80 x 40 project box with a lid lip and four screw posts, open top", "should_trigger": true },
+  { "query": "Can you sketch out a 3D part for a shelf support peg, 5mm pin, 12mm long, with a little ledge for the shelf to sit on", "should_trigger": true },
+  { "query": "need a simple planter pot, 120mm tall, tapered, drainage hole in the bottom. render it in the viewer pls", "should_trigger": true },
+  { "query": "Turn this into a 3D model: a washer, 20mm OD, 8.4mm ID, 2mm thick", "should_trigger": true },
+  { "query": "draft a replacement battery cover for my TV remote, 45 x 22 mm, 1.5 mm thick with a small tab on one end", "should_trigger": true },
+  { "query": "The viewer in app/public/index.html doesn't fit the camera properly for tall parts, can you fix the fit() function?", "should_trigger": false },
+  { "query": "what's the difference between a clearance hole and a tapped hole for an M4 screw? which drill size do I use for each", "should_trigger": false },
+  { "query": "Add an OBJ export button next to the STL button in the CAD viewer", "should_trigger": false },
+  { "query": "write a python script that converts an STL file to a point cloud and saves it as a .ply", "should_trigger": false },
+  { "query": "explain how constructive solid geometry works and why boolean ops on meshes can produce non-manifold results", "should_trigger": false },
+  { "query": "can you make the three.js scene background a gradient and add soft shadows to the grid", "should_trigger": false },
+  { "query": "draw me an SVG logo of a gear for my engineering club's website", "should_trigger": false },
+  { "query": "Write unit tests for app/lib/validate.mjs covering patterns and the torus warning", "should_trigger": false },
+  { "query": "how do I set up Fusion 360 to export a step file for a CNC shop", "should_trigger": false },
+  { "query": "my 3d printer keeps under-extruding on the first layer, PLA at 205C, what should I check", "should_trigger": false }
+]

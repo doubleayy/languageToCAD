@@ -1,0 +1,4 @@
+# One part per line. Lines starting with # are ignored.
+A 6-sided pencil holder, 70 mm across flats, 100 mm tall, 3 mm walls and a 4 mm floor
+A cable clip that snaps onto a 25 mm thick desk edge, 20 mm wide, with a 6 mm channel for a USB cable
+A replacement knob for a 6 mm D-shaft, 30 mm diameter, 15 mm tall, with 12 grip notches

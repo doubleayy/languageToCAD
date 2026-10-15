@@ -1,0 +1,126 @@
+{
+  "name": "L bracket",
+  "units": "mm",
+  "description": "60 mm wide L bracket, 50 mm legs, 5 mm thick, two 5.5 mm holes per leg, triangular gusset",
+  "color": "#7d8fa8",
+  "parameters": {
+    "width": 60,
+    "leg": 50,
+    "thickness": 5,
+    "hole_d": 5.5
+  },
+  "features": [
+    {
+      "id": "base-leg",
+      "op": "add",
+      "shape": "box",
+      "size": [
+        60,
+        50,
+        5
+      ],
+      "position": [
+        0,
+        0,
+        2.5
+      ]
+    },
+    {
+      "id": "upright-leg",
+      "op": "add",
+      "shape": "box",
+      "size": [
+        60,
+        5,
+        50
+      ],
+      "position": [
+        0,
+        -22.5,
+        25
+      ]
+    },
+    {
+      "id": "gusset",
+      "op": "add",
+      "shape": "box",
+      "size": [
+        4,
+        30,
+        30
+      ],
+      "position": [
+        0,
+        -20,
+        5
+      ],
+      "rotation": [
+        45,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "gusset-trim",
+      "op": "intersect",
+      "shape": "box",
+      "size": [
+        60,
+        50,
+        50
+      ],
+      "position": [
+        0,
+        0,
+        25
+      ]
+    },
+    {
+      "id": "base-hole",
+      "op": "subtract",
+      "shape": "cylinder",
+      "radius": 2.75,
+      "height": 8,
+      "position": [
+        -18,
+        7,
+        2.5
+      ],
+      "pattern": {
+        "type": "linear",
+        "count": 2,
+        "step": [
+          36,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "upright-hole",
+      "op": "subtract",
+      "shape": "cylinder",
+      "radius": 2.75,
+      "height": 8,
+      "position": [
+        -18,
+        -22.5,
+        32
+      ],
+      "rotation": [
+        90,
+        0,
+        0
+      ],
+      "pattern": {
+        "type": "linear",
+        "count": 2,
+        "step": [
+          36,
+          0,
+          0
+        ]
+      }
+    }
+  ]
+}

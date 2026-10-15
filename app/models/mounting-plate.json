@@ -1,0 +1,15 @@
+{
+  "name": "Mounting plate",
+  "units": "mm",
+  "description": "80 x 50 x 6 mm plate, four M4 clearance holes 6 mm from each edge",
+  "parameters": { "length": 80, "width": 50, "thickness": 6, "hole_d": 4.5 },
+  "features": [
+    { "id": "plate", "op": "add", "shape": "box", "size": [80, 50, 6], "position": [0, 0, 3] },
+    { "id": "hole", "op": "subtract", "shape": "cylinder", "radius": 2.25, "height": 8,
+      "position": [-34, -19, 3],
+      "pattern": { "type": "linear", "count": 2, "step": [68, 0, 0] } },
+    { "id": "hole-top-row", "op": "subtract", "shape": "cylinder", "radius": 2.25, "height": 8,
+      "position": [-34, 19, 3],
+      "pattern": { "type": "linear", "count": 2, "step": [68, 0, 0] } }
+  ]
+}
